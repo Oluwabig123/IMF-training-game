@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fast Finger 30s Challenge</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+</head>
+<body>
+
+    <!-- Main Container centered with Flexbox -->
+    <div class="game-card">
+        <h1>⚡ Fast Finger Challenge</h1>
+        <p class="subtitle">How many times can you click in 30 seconds?</p>
+
+        <!-- Game Stats Display -->
+        <div class="stats-container">
+            <div class="stat-box">
+                <span class="stat-label">TIME</span>
+                <span id="timer" class="stat-value">30s</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">SCORE</span>
+                <span id="score" class="stat-value">0</span>
+            </div>
+        </div>
+
+        <!-- Clickable Box -->
+        <button id="click-box" class="box" onclick="handleBoxClick()" disabled>
+            <span id="box-text">START</span>
+        </button>
+
+        <!-- Game Controls -->
+        <div class="controls">
+            <button id="start-btn" class="btn" onclick="startGame()">Start Game</button>
+        </div>
+
+        <!-- Final Results Banner -->
+        <div id="result-message" class="result-message hidden"></div>
+
+        <!-- Score Submission Section -->
+        <div id="submit-score-section" class="submit-score-section hidden">
+            <input type="text" id="player-name" placeholder="Enter your name" maxlength="15" />
+            <button id="submit-score-btn" class="btn-secondary" onclick="submitScore()">Submit Score</button>
+        </div>
+
+        <!-- Top 3 Players Leaderboard -->
+        <div class="leaderboard-container">
+            <h3>🏆 Top 3 Players</h3>
+            <ul id="leaderboard-list" class="leaderboard-list">
+                <li class="loading">Loading top players...</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

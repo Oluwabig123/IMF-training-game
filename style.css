@@ -1,0 +1,236 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Page level Flexbox Centering */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+}
+
+/* Card Container with Flexbox column orientation */
+.game-card {
+    background: #1e293b;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 90%;
+    max-width: 420px;
+    text-align: center;
+    border: 1px solid #334155;
+}
+
+h1 {
+    font-size: 1.8rem;
+    color: #f8fafc;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+/* Stats Layout */
+.stats-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 15px;
+}
+
+.stat-box {
+    background: #0f172a;
+    padding: 12px 20px;
+    border-radius: 12px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #334155;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    letter-spacing: 1px;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #38bdf8;
+}
+
+/* Interactive Click Box */
+.box {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    font-size: 2rem;
+    font-weight: 800;
+    border: none;
+    width: 100%;
+    height: 140px;
+    border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+    transition: transform 0.05s ease, background 0.3s ease;
+    user-select: none;
+}
+
+/* Active click pop effect */
+.box:active:not(:disabled) {
+    transform: scale(0.96);
+}
+
+.box:disabled {
+    background: #334155;
+    color: #64748b;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+/* Start / Restart Button */
+.btn {
+    background-color: #10b981;
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+    width: 100%;
+}
+
+.btn:hover {
+    background-color: #059669;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+/* Results text */
+.result-message {
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.5;
+    padding: 5px;
+    color: #38bdf8;
+}
+
+/* Score Submission Section */
+.submit-score-section {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.submit-score-section input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #334155;
+    background: #0f172a;
+    color: #fff;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.submit-score-section input:focus {
+    border-color: #38bdf8;
+}
+
+.btn-secondary {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+    white-space: nowrap;
+}
+
+.btn-secondary:hover {
+    background-color: #2563eb;
+}
+
+.btn-secondary:active {
+    transform: scale(0.98);
+}
+
+.btn-secondary:disabled {
+    background-color: #475569;
+    cursor: not-allowed;
+}
+
+/* Leaderboard Section */
+.leaderboard-container {
+    width: 100%;
+    background: #0f172a;
+    border-radius: 14px;
+    padding: 16px;
+    border: 1px solid #334155;
+    margin-top: 5px;
+}
+
+.leaderboard-container h3 {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    color: #f1f5f9;
+}
+
+.leaderboard-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.leaderboard-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1e293b;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    border: 1px solid #334155;
+}
+
+.leaderboard-item .player-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.leaderboard-item .player-score {
+    font-weight: bold;
+    color: #38bdf8;
+}
+
+.loading, .empty {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-style: italic;
+    padding: 8px 0;
+}
+
+.hidden {
+    display: none !important;
+}
