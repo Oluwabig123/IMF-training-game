@@ -87,7 +87,17 @@ function startGame() {
 function handleBoxClick(event) {
     if (!gameActive) return;
 
+    // Base increment
     score++;
+
+    // Rare Jackpot Chance (1.5% probability per tap)
+    const isJackpot = Math.random() < 0.015;
+    if (isJackpot && score > 5) {
+        // Multiply player's total current score by 2x!
+        score = score * 2;
+        triggerJackpotEffect(event);
+    }
+
     scoreDisplay.textContent = score;
 
     // Trigger visual pop pulse animation
@@ -97,6 +107,26 @@ function handleBoxClick(event) {
 
     // Spawn 3D IMF gold coin popup
     spawnIMFCoin(event);
+}
+
+// Special Jackpot Visual Burst Notification
+function triggerJackpotEffect(event) {
+    const rippleContainer = document.getElementById('click-ripple-container');
+    if (!rippleContainer) return;
+
+    const jackpotBanner = document.createElement('div');
+    jackpotBanner.className = 'jackpot-popup';
+    jackpotBanner.innerHTML = '🎰 2X JACKPOT! 🎰';
+
+    const rect = clickBox.getBoundingClientRect();
+    jackpotBanner.style.left = `${rect.width / 2}px`;
+    jackpotBanner.style.top = `${rect.height / 2}px`;
+
+    rippleContainer.appendChild(jackpotBanner);
+
+    setTimeout(() => {
+        jackpotBanner.remove();
+    }, 1200);
 }
 
 // Spawns a floating 3D IMF Gold Coin at touch/click coordinates

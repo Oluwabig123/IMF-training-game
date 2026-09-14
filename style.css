@@ -38,6 +38,7 @@ body {
 
 /* Glassmorphism Conference Card Container */
 .game-card {
+    position: relative;
     background: var(--card-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
@@ -216,18 +217,41 @@ body {
     margin-left: 6px;
 }
 
-@keyframes coinFloatFade {
+/* Jackpot Popup Banner Styling */
+.jackpot-popup {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: #ffffff;
+    font-family: var(--font-heading);
+    font-weight: 900;
+    font-size: 1.3rem;
+    padding: 10px 22px;
+    border-radius: 50px;
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.9), 0 0 10px rgba(239, 68, 68, 0.8);
+    border: 2px solid #fffbeb;
+    pointer-events: none;
+    z-index: 50;
+    white-space: nowrap;
+    animation: jackpotBurst 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes jackpotBurst {
     0% {
-        opacity: 0.8;
-        transform: translate(-50%, -20px) scale(0.6) rotate(0deg);
+        opacity: 0;
+        transform: translate(-50%, -30%) scale(0.3);
     }
-    30% {
+    20% {
         opacity: 1;
-        transform: translate(-50%, -90px) scale(1.1) rotate(90deg);
+        transform: translate(-50%, -80px) scale(1.25);
+    }
+    80% {
+        opacity: 1;
+        transform: translate(-50%, -120px) scale(1.1);
     }
     100% {
         opacity: 0;
-        transform: translate(-50%, -220px) scale(0.85) rotate(270deg);
+        transform: translate(-50%, -160px) scale(0.8);
     }
 }
 
