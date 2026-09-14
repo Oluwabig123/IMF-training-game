@@ -139,7 +139,7 @@ body {
                 inset 0 2px 4px rgba(255, 255, 255, 0.3);
     transition: transform 0.05s ease, box-shadow 0.15s ease, background 0.3s ease;
     touch-action: manipulation;
-    overflow: hidden;
+    overflow: visible;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -217,16 +217,17 @@ body {
 }
 
 @keyframes coinFloatFade {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(0.4) rotate(0deg);
+    0% {
+        opacity: 0.8;
+        transform: translate(-50%, -20px) scale(0.6) rotate(0deg);
     }
-    50% {
+    30% {
         opacity: 1;
-        transform: translate(-50%, -100px) scale(1.15) rotate(180deg);
+        transform: translate(-50%, -90px) scale(1.1) rotate(90deg);
     }
     100% {
         opacity: 0;
-        transform: translate(-50%, -150px) scale(0.9) rotate(360deg);
+        transform: translate(-50%, -220px) scale(0.85) rotate(270deg);
     }
 }
 
