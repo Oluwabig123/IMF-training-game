@@ -63,7 +63,7 @@ function startGame() {
     // UI Updates
     scoreDisplay.textContent = score;
     timerDisplay.textContent = `${timeLeft}s`;
-    boxText.textContent = 'CLICK!';
+    boxText.innerHTML = 'CLICK! 🪙';
     
     clickBox.disabled = false;
     startBtn.disabled = true;
