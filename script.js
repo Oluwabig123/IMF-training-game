@@ -131,8 +131,8 @@ function triggerJackpotEffect(event) {
 
 // Spawns a floating 3D IMF Gold Coin at touch/click coordinates
 function spawnIMFCoin(event) {
-    const rippleContainer = document.getElementById('click-ripple-container');
-    if (!rippleContainer) return;
+    const globalCoinLayer = document.getElementById('global-coin-layer');
+    if (!globalCoinLayer) return;
 
     const rect = clickBox.getBoundingClientRect();
     const coin = document.createElement('div');
@@ -152,17 +152,17 @@ function spawnIMFCoin(event) {
         }
     }
 
-    // Add slight random horizontal drift (-25px to +25px)
-    const randomOffset = (Math.random() - 0.5) * 50;
+    // Add slight random horizontal drift (-30px to +30px)
+    const randomOffset = (Math.random() - 0.5) * 60;
 
-    coin.style.left = `${clientX - rect.left + randomOffset}px`;
-    coin.style.top = `${clientY - rect.top}px`;
+    coin.style.left = `${clientX + randomOffset}px`;
+    coin.style.top = `${clientY}px`;
 
-    rippleContainer.appendChild(coin);
+    globalCoinLayer.appendChild(coin);
 
     setTimeout(() => {
         coin.remove();
-    }, 650);
+    }, 750);
 }
 
 // End Game Logic

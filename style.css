@@ -170,29 +170,56 @@ body {
     100% { transform: scale(1); }
 }
 
+/* Global Floating Unclipped Coin Container */
+#global-coin-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+}
+
 /* IMF Metallic Coin Burst Animation */
 .imf-coin {
-    position: absolute;
-    width: 42px;
-    height: 42px;
+    position: fixed;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     background: radial-gradient(circle at 35% 35%, #fef08a 0%, #f59e0b 60%, #b45309 100%);
     border: 2px solid #fffbeb;
-    box-shadow: 0 0 15px rgba(245, 158, 11, 0.8),
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.9),
                 inset 0 2px 4px rgba(255, 255, 255, 0.8),
                 inset 0 -2px 4px rgba(0, 0, 0, 0.4);
     color: #78350f;
     font-family: var(--font-heading);
     font-weight: 900;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     display: flex;
     justify-content: center;
     align-items: center;
     pointer-events: none;
     user-select: none;
-    z-index: 10;
-    animation: coinFloatFade 0.65s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    z-index: 9999;
+    animation: coinFloatFade 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     letter-spacing: -0.5px;
+}
+
+@keyframes coinFloatFade {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+    }
+    30% {
+        opacity: 1;
+        transform: translate(-50%, -120px) scale(1.2) rotate(120deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -280px) scale(0.7) rotate(360deg);
+    }
 }
 
 /* Mini Inline IMF Gold Coin for Text Labels */
