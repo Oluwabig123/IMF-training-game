@@ -63,7 +63,7 @@ function startGame() {
     // UI Updates
     scoreDisplay.textContent = score;
     timerDisplay.textContent = `${timeLeft}s`;
-    boxText.innerHTML = 'CLICK! 🪙';
+    boxText.innerHTML = 'CLICK! <span class="inline-coin">IMF</span>';
     
     clickBox.disabled = false;
     startBtn.disabled = true;
