@@ -2,8 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Fast Finger 30s Challenge</title>
+    <!-- Modern Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
@@ -14,31 +19,35 @@
 </head>
 <body>
 
-    <!-- Main Container centered with Flexbox -->
-    <div class="game-card">
-        <h1>⚡ Fast Finger Challenge</h1>
-        <p class="subtitle">How many times can you click in 30 seconds?</p>
+    <!-- Main Container optimized for Mobile & Conference Projectors -->
+    <main class="game-card">
+        <!-- Header -->
+        <header class="game-header">
+            <div class="title-badge">⚡ FAST FINGER CHALLENGE</div>
+            <p class="subtitle">How fast can your fingers move in 30 seconds?</p>
+        </header>
 
         <!-- Game Stats Display -->
-        <div class="stats-container">
-            <div class="stat-box">
-                <span class="stat-label">TIME</span>
+        <section class="stats-container">
+            <div class="stat-box timer-box">
+                <span class="stat-label">TIME LEFT</span>
                 <span id="timer" class="stat-value">30s</span>
             </div>
-            <div class="stat-box">
-                <span class="stat-label">SCORE</span>
+            <div class="stat-box score-box">
+                <span class="stat-label">TOTAL CLICKS</span>
                 <span id="score" class="stat-value">0</span>
             </div>
-        </div>
+        </section>
 
-        <!-- Clickable Box -->
-        <button id="click-box" class="box" onclick="handleBoxClick()" disabled>
-            <span id="box-text">START</span>
+        <!-- Interactive Click Box -->
+        <button id="click-box" class="click-trigger-box" onclick="handleBoxClick()" disabled>
+            <span id="box-text">TAP TO START</span>
+            <span id="click-ripple-container"></span>
         </button>
 
-        <!-- Game Controls -->
+        <!-- Primary Action Button -->
         <div class="controls">
-            <button id="start-btn" class="btn" onclick="startGame()">Start Game</button>
+            <button id="start-btn" class="btn-primary" onclick="startGame()">Start Challenge 🚀</button>
         </div>
 
         <!-- Final Results Banner -->
@@ -46,18 +55,21 @@
 
         <!-- Score Submission Section -->
         <div id="submit-score-section" class="submit-score-section hidden">
-            <input type="text" id="player-name" placeholder="Enter your name" maxlength="15" />
-            <button id="submit-score-btn" class="btn-secondary" onclick="submitScore()">Submit Score</button>
+            <input type="text" id="player-name" placeholder="Enter your full name..." maxlength="25" autocomplete="off" autocorrect="off" />
+            <button id="submit-score-btn" class="btn-submit" onclick="submitScore()">Save Score 🏆</button>
         </div>
 
         <!-- Top 3 Players Leaderboard -->
-        <div class="leaderboard-container">
-            <h3>🏆 Top 3 Players</h3>
+        <section class="leaderboard-container">
+            <div class="leaderboard-header">
+                <h3>🏆 TOP 3 PLAYERS</h3>
+                <span class="live-indicator">LIVE</span>
+            </div>
             <ul id="leaderboard-list" class="leaderboard-list">
-                <li class="loading">Loading top players...</li>
+                <li class="loading">Fetching top speedsters...</li>
             </ul>
-        </div>
-    </div>
+        </section>
+    </main>
 
     <script src="script.js"></script>
 </body>
