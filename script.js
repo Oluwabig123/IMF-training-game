@@ -95,31 +95,44 @@ function handleBoxClick(event) {
     void clickBox.offsetWidth; // Trigger reflow
     clickBox.classList.add('active-pulse');
 
-    // Create tap ripple effect if event coordinates exist
-    if (event) {
-        createRipple(event);
-    }
+    // Spawn 3D IMF gold coin popup
+    spawnIMFCoin(event);
 }
 
-// Tap ripple effect utility
-function createRipple(event) {
+// Spawns a floating 3D IMF Gold Coin at touch/click coordinates
+function spawnIMFCoin(event) {
     const rippleContainer = document.getElementById('click-ripple-container');
     if (!rippleContainer) return;
 
     const rect = clickBox.getBoundingClientRect();
-    const ripple = document.createElement('span');
-    ripple.className = 'ripple';
+    const coin = document.createElement('div');
+    coin.className = 'imf-coin';
+    coin.innerText = 'IMF';
 
-    const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-    const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+    let clientX = rect.left + rect.width / 2;
+    let clientY = rect.top + rect.height / 2;
 
-    const size = Math.max(rect.width, rect.height);
-    ripple.style.width = ripple.style.height = `${size}px`;
-    ripple.style.left = `${clientX - rect.left - size / 2}px`;
-    ripple.style.top = `${clientY - rect.top - size / 2}px`;
+    if (event) {
+        if (event.touches && event.touches.length > 0) {
+            clientX = event.touches[0].clientX;
+            clientY = event.touches[0].clientY;
+        } else if (event.clientX && event.clientY) {
+            clientX = event.clientX;
+            clientY = event.clientY;
+        }
+    }
 
-    rippleContainer.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 400);
+    // Add slight random horizontal drift (-25px to +25px)
+    const randomOffset = (Math.random() - 0.5) * 50;
+
+    coin.style.left = `${clientX - rect.left + randomOffset}px`;
+    coin.style.top = `${clientY - rect.top}px`;
+
+    rippleContainer.appendChild(coin);
+
+    setTimeout(() => {
+        coin.remove();
+    }, 650);
 }
 
 // End Game Logic
