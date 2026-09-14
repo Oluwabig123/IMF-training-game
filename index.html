@@ -50,15 +50,6 @@
             <button id="start-btn" class="btn-primary" onclick="startGame()">Start Challenge 🚀</button>
         </div>
 
-        <!-- Final Results Banner -->
-        <div id="result-message" class="result-message hidden"></div>
-
-        <!-- Score Submission Section -->
-        <div id="submit-score-section" class="submit-score-section hidden">
-            <input type="text" id="player-name" placeholder="Enter your full name..." maxlength="25" autocomplete="off" autocorrect="off" />
-            <button id="submit-score-btn" class="btn-submit" onclick="submitScore()">Save Score 🏆</button>
-        </div>
-
         <!-- Top 3 Players Leaderboard -->
         <section class="leaderboard-container">
             <div class="leaderboard-header">
@@ -70,6 +61,47 @@
             </ul>
         </section>
     </main>
+
+    <!-- Modal Overlay for Results & Score Submission -->
+    <div id="result-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <button class="close-modal-btn" onclick="closeModal()">✕</button>
+
+            <div class="modal-header">
+                <div class="modal-trophy">🎉</div>
+                <h2>Congratulations!</h2>
+                <p class="modal-subtitle">You completed the 30s Challenge</p>
+            </div>
+
+            <!-- Stats Highlight Grid inside Modal -->
+            <div class="modal-stats">
+                <div class="modal-stat-box">
+                    <span class="m-label">CLICKS</span>
+                    <span id="modal-score" class="m-value">0</span>
+                </div>
+                <div class="modal-stat-box">
+                    <span class="m-label">SPEED</span>
+                    <span id="modal-cps" class="m-value">0 CPS</span>
+                </div>
+            </div>
+
+            <!-- Speed Rank Rating Badge -->
+            <div id="modal-rank-badge" class="modal-rank-badge">
+                ⚡ FAST FINGERS!
+            </div>
+
+            <!-- Score Submission Section inside Modal -->
+            <div id="submit-score-section" class="submit-score-section">
+                <label for="player-name">Submit Your Score to Leaderboard</label>
+                <div class="input-group">
+                    <input type="text" id="player-name" placeholder="Enter your full name..." maxlength="25" autocomplete="off" autocorrect="off" />
+                    <button id="submit-score-btn" class="btn-submit" onclick="submitScore()">Save Score 🏆</button>
+                </div>
+            </div>
+
+            <button class="btn-secondary-play" onclick="closeModalAndPlayAgain()">Play Again 🔄</button>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>

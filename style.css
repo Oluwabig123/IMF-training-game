@@ -243,15 +243,28 @@ body {
 /* Score Submission Section */
 .submit-score-section {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: 8px;
     width: 100%;
-    animation: fadeIn 0.3s ease;
+    text-align: left;
+    margin-top: 5px;
+}
+
+.submit-score-section label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.input-group {
+    display: flex;
+    gap: 8px;
+    width: 100%;
 }
 
 .submit-score-section input {
     flex: 1;
-    min-width: 0; /* Prevents input from expanding beyond flex container */
+    min-width: 0;
     padding: 12px 14px;
     border-radius: 14px;
     border: 1px solid var(--border-color);
@@ -286,6 +299,168 @@ body {
 
 .btn-submit:active {
     transform: scale(0.97);
+}
+
+/* Modal Overlay & Congratulatory Card */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(9, 13, 22, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+    padding: 20px;
+    animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-card {
+    position: relative;
+    background: rgba(18, 25, 41, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                0 0 40px rgba(56, 189, 248, 0.25);
+    border-radius: 28px;
+    padding: 30px 24px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    animation: modalPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    color: #94a3b8;
+    font-size: 1.1rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.close-modal-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+}
+
+.modal-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.modal-trophy {
+    font-size: 3rem;
+    filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.5));
+    animation: trophyBounce 1s ease infinite alternate;
+}
+
+@keyframes trophyBounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-6px); }
+}
+
+.modal-header h2 {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #fff;
+}
+
+.modal-subtitle {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+/* Modal Stats Highlight Grid */
+.modal-stats {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+.modal-stat-box {
+    flex: 1;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.m-label {
+    font-size: 0.7rem;
+    color: #64748b;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.m-value {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary-cyan);
+}
+
+.modal-rank-badge {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(37, 99, 235, 0.15));
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    color: var(--primary-cyan);
+    font-family: var(--font-heading);
+    font-weight: 800;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    width: 100%;
+}
+
+.btn-secondary-play {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f1f5f9;
+    border: 1px solid var(--border-color);
+    padding: 14px;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 800;
+    border-radius: 16px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s ease;
+}
+
+.btn-secondary-play:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modalPop {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
 }
 
 @media (max-width: 360px) {

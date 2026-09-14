@@ -1,6 +1,7 @@
 // DOM Elements Variables
-let clickBox, boxText, timerDisplay, scoreDisplay, startBtn, resultMessage;
+let clickBox, boxText, timerDisplay, scoreDisplay, startBtn;
 let submitScoreSection, playerNameInput, submitScoreBtn, leaderboardList;
+let resultModal, modalScore, modalCps, modalRankBadge;
 
 // Game State Variables
 let score = 0;
@@ -24,12 +25,16 @@ function init() {
     timerDisplay = document.getElementById('timer');
     scoreDisplay = document.getElementById('score');
     startBtn = document.getElementById('start-btn');
-    resultMessage = document.getElementById('result-message');
 
     submitScoreSection = document.getElementById('submit-score-section');
     playerNameInput = document.getElementById('player-name');
     submitScoreBtn = document.getElementById('submit-score-btn');
     leaderboardList = document.getElementById('leaderboard-list');
+
+    resultModal = document.getElementById('result-modal');
+    modalScore = document.getElementById('modal-score');
+    modalCps = document.getElementById('modal-cps');
+    modalRankBadge = document.getElementById('modal-rank-badge');
 
     fetchTopPlayers();
 }
@@ -42,6 +47,8 @@ if (document.readyState === 'loading') {
 
 // Start / Reset Game
 function startGame() {
+    closeModal();
+
     // Clear any existing active timer interval
     if (timerInterval) {
         clearInterval(timerInterval);
@@ -57,8 +64,6 @@ function startGame() {
     scoreDisplay.textContent = score;
     timerDisplay.textContent = `${timeLeft}s`;
     boxText.textContent = 'CLICK!';
-    resultMessage.classList.add('hidden');
-    submitScoreSection.classList.add('hidden');
     
     clickBox.disabled = false;
     startBtn.disabled = true;
@@ -129,7 +134,7 @@ function endGame() {
     clickBox.disabled = true;
     startBtn.disabled = false;
     startBtn.style.opacity = '1';
-    startBtn.textContent = 'Play Again 🔄';
+    startBtn.textContent = 'Start Challenge 🚀';
     boxText.textContent = 'TIME UP! ⏰';
 
     // Calculate Clicks Per Second (CPS)
@@ -142,20 +147,32 @@ function endGame() {
     else if (score >= 100) rank = '👍 GOOD SPEED! Above average!';
     else rank = '🐢 CASUAL CLICKER! Practice makes perfect.';
 
-    // Display Results
-    resultMessage.innerHTML = `
-        ⚡ Challenge Completed!<br> 
-        Final Score: <strong>${score}</strong> clicks (${cps} CPS)<br>
-        ${rank}
-    `;
-    resultMessage.classList.remove('hidden');
+    // Populate Modal Summary
+    if (modalScore) modalScore.textContent = score;
+    if (modalCps) modalCps.textContent = `${cps} CPS`;
+    if (modalRankBadge) modalRankBadge.textContent = rank;
 
-    // Show name submission form
-    if (score > 0) {
-        submitScoreSection.classList.remove('hidden');
+    // Reset submit button state
+    if (submitScoreBtn) {
         submitScoreBtn.disabled = false;
         submitScoreBtn.textContent = 'Save Score 🏆';
     }
+
+    // Show congratulatory popup modal
+    if (resultModal) {
+        resultModal.classList.remove('hidden');
+    }
+}
+
+function closeModal() {
+    if (resultModal) {
+        resultModal.classList.add('hidden');
+    }
+}
+
+function closeModalAndPlayAgain() {
+    closeModal();
+    startGame();
 }
 
 // LocalStorage fallback key
@@ -165,7 +182,7 @@ const LOCAL_STORAGE_KEY = 'fastest_finger_top_scores';
 async function submitScore() {
     const name = playerNameInput.value.trim();
     if (!name) {
-        alert('Please enter your name!');
+        alert('Please enter your full name!');
         return;
     }
 
@@ -192,8 +209,8 @@ async function submitScore() {
         saveLocalScore({ player_name: name, score: score, cps: cps });
     }
 
-    submitScoreSection.classList.add('hidden');
     playerNameInput.value = '';
+    closeModal();
     fetchTopPlayers();
 }
 
