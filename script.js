@@ -271,7 +271,7 @@ function renderLeaderboard(players, isOffline) {
                 <span class="rank-badge">${badges[index] || ''}</span> 
                 ${escapeHtml(item.player_name)}
             </span>
-            <span class="player-score">${item.score} pts <small style="font-size:0.75rem; opacity:0.8;">(${item.cps} CPS)</small></span>
+            <span class="player-score">${item.score} pts</span>
         </li>
     `).join('');
 }

@@ -258,6 +258,8 @@ body {
 
 .input-group {
     display: flex;
+    flex-direction: row;
+    align-items: center;
     gap: 8px;
     width: 100%;
 }
@@ -265,6 +267,7 @@ body {
 .submit-score-section input {
     flex: 1;
     min-width: 0;
+    width: 100%;
     padding: 12px 14px;
     border-radius: 14px;
     border: 1px solid var(--border-color);
@@ -463,15 +466,7 @@ body {
     to { transform: scale(1); opacity: 1; }
 }
 
-@media (max-width: 360px) {
-    .submit-score-section {
-        flex-direction: column;
-    }
-    .btn-submit {
-        width: 100%;
-        padding: 12px;
-    }
-}
+
 
 /* Leaderboard Section (Conference Projection Ready) */
 .leaderboard-container {
@@ -555,7 +550,7 @@ body {
     gap: 10px;
     font-weight: 700;
     color: #f8fafc;
-    max-width: 65%;
+    max-width: 78%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
