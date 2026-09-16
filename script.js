@@ -260,67 +260,83 @@ async function submitScore() {
         try {
             const numericScore = parseInt(score, 10);
 
-            // 1. Try finding by device_id
+            // Attempt query with device_id, fallback to player_name if device_id column missing
             let existing = null;
-            if (deviceId) {
-                const { data: existingDevice } = await supabase
-                    .from('leaderboard')
-                    .select('id, score, player_name')
-                    .eq('device_id', deviceId)
-                    .order('id', { ascending: false })
-                    .limit(1);
 
-                if (existingDevice && existingDevice.length > 0) {
-                    existing = existingDevice[0];
+            try {
+                if (deviceId) {
+                    const { data: existingDevice } = await supabase
+                        .from('leaderboard')
+                        .select('id, score, player_name')
+                        .eq('device_id', deviceId)
+                        .order('id', { ascending: false })
+                        .limit(1);
+
+                    if (existingDevice && existingDevice.length > 0) {
+                        existing = existingDevice[0];
+                    }
                 }
+            } catch (e) {
+                console.warn('device_id check skipped:', e);
             }
 
-            // 2. If not found by device_id, try by player_name
             if (!existing) {
-                const { data: existingName } = await supabase
+                const { data: existingName, error: nameErr } = await supabase
                     .from('leaderboard')
                     .select('id, score, player_name')
                     .ilike('player_name', name)
                     .order('id', { ascending: false })
                     .limit(1);
 
-                if (existingName && existingName.length > 0) {
+                if (!nameErr && existingName && existingName.length > 0) {
                     existing = existingName[0];
                 }
             }
 
             if (existing) {
-                // Update player_name and update score if new score is higher
-                const updates = { player_name: name };
-                if (deviceId) updates.device_id = deviceId;
-
                 const existingScore = parseInt(existing.score, 10) || 0;
+                
+                // Only execute update if new score is strictly higher than existing score
                 if (numericScore > existingScore) {
-                    updates.score = numericScore;
-                    updates.cps = cps;
+                    // Try updating with device_id first
+                    let updateSuccess = false;
+                    try {
+                        const { error: err1 } = await supabase
+                            .from('leaderboard')
+                            .update({ player_name: name, score: numericScore, cps: cps, device_id: deviceId })
+                            .eq('id', existing.id);
+                        if (!err1) updateSuccess = true;
+                    } catch (e) {}
+
+                    // Fallback update without device_id if column missing
+                    if (!updateSuccess) {
+                        const { error: err2 } = await supabase
+                            .from('leaderboard')
+                            .update({ player_name: name, score: numericScore, cps: cps })
+                            .eq('id', existing.id);
+                        if (err2) throw err2;
+                    }
                 }
-
-                const { error: updateErr } = await supabase
-                    .from('leaderboard')
-                    .update(updates)
-                    .eq('id', existing.id);
-
-                if (updateErr) throw updateErr;
             } else {
                 // New player entry
-                const newRecord = { player_name: name, score: numericScore, cps: cps };
-                if (deviceId) newRecord.device_id = deviceId;
+                let insertSuccess = false;
+                try {
+                    const { error: err1 } = await supabase
+                        .from('leaderboard')
+                        .insert([{ device_id: deviceId, player_name: name, score: numericScore, cps: cps }]);
+                    if (!err1) insertSuccess = true;
+                } catch (e) {}
 
-                const { error: insertErr } = await supabase
-                    .from('leaderboard')
-                    .insert([newRecord]);
-
-                if (insertErr) throw insertErr;
+                if (!insertSuccess) {
+                    const { error: err2 } = await supabase
+                        .from('leaderboard')
+                        .insert([{ player_name: name, score: numericScore, cps: cps }]);
+                    if (err2) throw err2;
+                }
             }
         } catch (err) {
             console.error('Error submitting score to Supabase:', err);
-            // Fall back to saving locally so score isn't lost
-            saveLocalScore({ device_id: deviceId, player_name: name, score: score, cps: cps });
+            saveLocalScore({ device_id: deviceId, player_name: name, score: numericScore, cps: cps });
         }
     } else {
         // Fallback: Save to LocalStorage
