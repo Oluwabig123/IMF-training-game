@@ -227,6 +227,16 @@ function closeModalAndPlayAgain() {
 // LocalStorage fallback key
 const LOCAL_STORAGE_KEY = 'fastest_finger_top_scores';
 
+// Get or generate a unique Device ID per phone/browser
+function getDeviceId() {
+    let deviceId = localStorage.getItem('fastest_finger_device_id');
+    if (!deviceId) {
+        deviceId = 'dev_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+        localStorage.setItem('fastest_finger_device_id', deviceId);
+    }
+    return deviceId;
+}
+
 // Submit score (Supabase or LocalStorage fallback)
 async function submitScore() {
     const name = playerNameInput.value.trim();
@@ -234,6 +244,8 @@ async function submitScore() {
         alert('Please enter your full name!');
         return;
     }
+
+    const deviceId = getDeviceId();
 
     // Save name to localStorage for fast repeat play
     localStorage.setItem('fastest_finger_player_name', name);
@@ -246,59 +258,82 @@ async function submitScore() {
     // If Supabase is configured, submit to Supabase
     if (supabase) {
         try {
-            // Check if player already exists in database
-            const { data: existing, error: selectErr } = await supabase
+            // Check if player already exists in database by device_id OR player_name
+            let existing = null;
+
+            // 1. Try finding by device_id
+            const { data: existingDevice } = await supabase
                 .from('leaderboard')
-                .select('id, score')
-                .ilike('player_name', name)
+                .select('id, score, player_name, device_id')
+                .eq('device_id', deviceId)
                 .maybeSingle();
 
-            if (selectErr && selectErr.code !== 'PGRST116') {
-                console.warn('Error checking existing score:', selectErr);
+            existing = existingDevice;
+
+            // 2. If not found by device_id, try by player_name
+            if (!existing) {
+                const { data: existingName } = await supabase
+                    .from('leaderboard')
+                    .select('id, score, player_name, device_id')
+                    .ilike('player_name', name)
+                    .maybeSingle();
+
+                existing = existingName;
             }
 
             if (existing) {
-                // Only update if new score is higher than personal best
+                // Update player_name (if changed) and update score if higher
+                const updates = { player_name: name, device_id: deviceId };
                 if (score > existing.score) {
-                    const { error: updateErr } = await supabase
-                        .from('leaderboard')
-                        .update({ score: score, cps: cps })
-                        .eq('id', existing.id);
-
-                    if (updateErr) throw updateErr;
+                    updates.score = score;
+                    updates.cps = cps;
                 }
+
+                const { error: updateErr } = await supabase
+                    .from('leaderboard')
+                    .update(updates)
+                    .eq('id', existing.id);
+
+                if (updateErr) throw updateErr;
             } else {
                 // New player entry
                 const { error: insertErr } = await supabase
                     .from('leaderboard')
-                    .insert([{ player_name: name, score: score, cps: cps }]);
+                    .insert([{ device_id: deviceId, player_name: name, score: score, cps: cps }]);
 
                 if (insertErr) throw insertErr;
             }
         } catch (err) {
             console.error('Error submitting score to Supabase:', err);
             // Fall back to saving locally so score isn't lost
-            saveLocalScore({ player_name: name, score: score, cps: cps });
+            saveLocalScore({ device_id: deviceId, player_name: name, score: score, cps: cps });
         }
     } else {
         // Fallback: Save to LocalStorage
-        saveLocalScore({ player_name: name, score: score, cps: cps });
+        saveLocalScore({ device_id: deviceId, player_name: name, score: score, cps: cps });
     }
 
     closeModal();
     fetchTopPlayers();
 }
 
-// Save score to browser LocalStorage (Personal Best per player)
+// Save score to browser LocalStorage (Personal Best per player device/name)
 function saveLocalScore(newEntry) {
     let localScores = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
     
-    const existingIndex = localScores.findIndex(item => item.player_name.toLowerCase() === newEntry.player_name.toLowerCase());
+    // Find index by device_id OR player_name
+    const existingIndex = localScores.findIndex(item => 
+        (item.device_id && item.device_id === newEntry.device_id) || 
+        (item.player_name && item.player_name.toLowerCase() === newEntry.player_name.toLowerCase())
+    );
     
     if (existingIndex !== -1) {
-        // Only update if new score is higher
+        localScores[existingIndex].player_name = newEntry.player_name;
+        localScores[existingIndex].device_id = newEntry.device_id;
+        // Only update score if higher
         if (newEntry.score > localScores[existingIndex].score) {
-            localScores[existingIndex] = newEntry;
+            localScores[existingIndex].score = newEntry.score;
+            localScores[existingIndex].cps = newEntry.cps;
         }
     } else {
         localScores.push(newEntry);

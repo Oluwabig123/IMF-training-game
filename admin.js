@@ -35,12 +35,12 @@ async function fetchAdminData() {
 
     if (supabaseAdmin) {
         try {
-            // Fetch Top 10 High Scores
+            // Fetch Top 3 High Scores
             const { data, error } = await supabaseAdmin
                 .from('leaderboard')
                 .select('player_name, score, cps, created_at')
                 .order('score', { ascending: false })
-                .limit(10);
+                .limit(3);
 
             if (error) throw error;
             playersData = data || [];
