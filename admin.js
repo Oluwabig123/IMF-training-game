@@ -35,12 +35,12 @@ async function fetchAdminData() {
 
     if (supabaseAdmin) {
         try {
-            // Fetch Top 3 High Scores
+            // Fetch Top High Scores
             const { data, error } = await supabaseAdmin
                 .from('leaderboard')
                 .select('player_name, score, cps, created_at')
                 .order('score', { ascending: false })
-                .limit(3);
+                .limit(10);
 
             if (error) throw error;
             playersData = data || [];
@@ -169,11 +169,11 @@ async function confirmResetLeaderboard() {
     const err = document.getElementById('pin-error');
     const pinEntered = input ? input.value.trim() : '';
 
-    const expectedPin = typeof ADMIN_PIN !== 'undefined' ? ADMIN_PIN : "1234";
+    const expectedPin = typeof ADMIN_PIN !== 'undefined' ? ADMIN_PIN : "IMF2026game";
 
     if (pinEntered !== expectedPin) {
         if (err) {
-            err.textContent = '❌ Incorrect PIN! Please check config.js (Default: 1234)';
+            err.textContent = '❌ Incorrect PIN!';
             err.classList.remove('hidden');
         }
         return;

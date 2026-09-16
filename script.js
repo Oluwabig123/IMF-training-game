@@ -258,34 +258,45 @@ async function submitScore() {
     // If Supabase is configured, submit to Supabase
     if (supabase) {
         try {
-            // Check if player already exists in database by device_id OR player_name
-            let existing = null;
+            const numericScore = parseInt(score, 10);
 
             // 1. Try finding by device_id
-            const { data: existingDevice } = await supabase
-                .from('leaderboard')
-                .select('id, score, player_name, device_id')
-                .eq('device_id', deviceId)
-                .maybeSingle();
+            let existing = null;
+            if (deviceId) {
+                const { data: existingDevice } = await supabase
+                    .from('leaderboard')
+                    .select('id, score, player_name')
+                    .eq('device_id', deviceId)
+                    .order('id', { ascending: false })
+                    .limit(1);
 
-            existing = existingDevice;
+                if (existingDevice && existingDevice.length > 0) {
+                    existing = existingDevice[0];
+                }
+            }
 
             // 2. If not found by device_id, try by player_name
             if (!existing) {
                 const { data: existingName } = await supabase
                     .from('leaderboard')
-                    .select('id, score, player_name, device_id')
+                    .select('id, score, player_name')
                     .ilike('player_name', name)
-                    .maybeSingle();
+                    .order('id', { ascending: false })
+                    .limit(1);
 
-                existing = existingName;
+                if (existingName && existingName.length > 0) {
+                    existing = existingName[0];
+                }
             }
 
             if (existing) {
-                // Update player_name (if changed) and update score if higher
-                const updates = { player_name: name, device_id: deviceId };
-                if (score > existing.score) {
-                    updates.score = score;
+                // Update player_name and update score if new score is higher
+                const updates = { player_name: name };
+                if (deviceId) updates.device_id = deviceId;
+
+                const existingScore = parseInt(existing.score, 10) || 0;
+                if (numericScore > existingScore) {
+                    updates.score = numericScore;
                     updates.cps = cps;
                 }
 
@@ -297,9 +308,12 @@ async function submitScore() {
                 if (updateErr) throw updateErr;
             } else {
                 // New player entry
+                const newRecord = { player_name: name, score: numericScore, cps: cps };
+                if (deviceId) newRecord.device_id = deviceId;
+
                 const { error: insertErr } = await supabase
                     .from('leaderboard')
-                    .insert([{ device_id: deviceId, player_name: name, score: score, cps: cps }]);
+                    .insert([newRecord]);
 
                 if (insertErr) throw insertErr;
             }
