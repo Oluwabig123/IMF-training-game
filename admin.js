@@ -163,27 +163,29 @@ function closePinModal() {
     if (modal) modal.classList.add('hidden');
 }
 
-// Helper function to hash text using Web Crypto API
-async function sha256(str) {
-    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
 // Confirm Leaderboard Reset
 async function confirmResetLeaderboard() {
     const input = document.getElementById('mod-pin-input');
     const err = document.getElementById('pin-error');
     const pinEntered = input ? input.value.trim() : '';
 
-    const expectedHash = typeof ADMIN_PIN_HASH !== 'undefined' 
-        ? ADMIN_PIN_HASH 
-        : "8e950cdeddfef3ebedb8c4c79ea01db6ae1bd89e248b940428d0113f898317d7";
+    // Decode obfuscated security token at runtime
+    let expectedPin = "";
+    try {
+        if (typeof _MOD_SEC_TOKEN !== 'undefined') {
+            expectedPin = atob(_MOD_SEC_TOKEN);
+        } else if (typeof ADMIN_PIN !== 'undefined') {
+            expectedPin = ADMIN_PIN;
+        } else {
+            expectedPin = atob("SU1GMjAyNmdhbWU=");
+        }
+    } catch (e) {
+        expectedPin = "";
+    }
 
-    const enteredHash = await sha256(pinEntered);
-
-    if (enteredHash !== expectedHash) {
+    if (pinEntered !== expectedPin) {
         if (err) {
-            err.textContent = '❌ Incorrect PIN!';
+            err.textContent = '❌ Incorrect PIN! Try again.';
             err.classList.remove('hidden');
         }
         return;
