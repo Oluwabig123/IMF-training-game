@@ -36,6 +36,12 @@ function init() {
     modalCps = document.getElementById('modal-cps');
     modalRankBadge = document.getElementById('modal-rank-badge');
 
+    // Pre-fill saved player name if available
+    const savedName = localStorage.getItem('fastest_finger_player_name');
+    if (savedName && playerNameInput) {
+        playerNameInput.value = savedName;
+    }
+
     fetchTopPlayers();
 }
 
@@ -229,6 +235,9 @@ async function submitScore() {
         return;
     }
 
+    // Save name to localStorage for fast repeat play
+    localStorage.setItem('fastest_finger_player_name', name);
+
     const cps = parseFloat((score / 30).toFixed(2));
 
     submitScoreBtn.disabled = true;
@@ -237,11 +246,35 @@ async function submitScore() {
     // If Supabase is configured, submit to Supabase
     if (supabase) {
         try {
-            const { error } = await supabase
+            // Check if player already exists in database
+            const { data: existing, error: selectErr } = await supabase
                 .from('leaderboard')
-                .insert([{ player_name: name, score: score, cps: cps }]);
+                .select('id, score')
+                .ilike('player_name', name)
+                .maybeSingle();
 
-            if (error) throw error;
+            if (selectErr && selectErr.code !== 'PGRST116') {
+                console.warn('Error checking existing score:', selectErr);
+            }
+
+            if (existing) {
+                // Only update if new score is higher than personal best
+                if (score > existing.score) {
+                    const { error: updateErr } = await supabase
+                        .from('leaderboard')
+                        .update({ score: score, cps: cps })
+                        .eq('id', existing.id);
+
+                    if (updateErr) throw updateErr;
+                }
+            } else {
+                // New player entry
+                const { error: insertErr } = await supabase
+                    .from('leaderboard')
+                    .insert([{ player_name: name, score: score, cps: cps }]);
+
+                if (insertErr) throw insertErr;
+            }
         } catch (err) {
             console.error('Error submitting score to Supabase:', err);
             // Fall back to saving locally so score isn't lost
@@ -252,15 +285,25 @@ async function submitScore() {
         saveLocalScore({ player_name: name, score: score, cps: cps });
     }
 
-    playerNameInput.value = '';
     closeModal();
     fetchTopPlayers();
 }
 
-// Save score to browser LocalStorage
+// Save score to browser LocalStorage (Personal Best per player)
 function saveLocalScore(newEntry) {
     let localScores = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
-    localScores.push(newEntry);
+    
+    const existingIndex = localScores.findIndex(item => item.player_name.toLowerCase() === newEntry.player_name.toLowerCase());
+    
+    if (existingIndex !== -1) {
+        // Only update if new score is higher
+        if (newEntry.score > localScores[existingIndex].score) {
+            localScores[existingIndex] = newEntry;
+        }
+    } else {
+        localScores.push(newEntry);
+    }
+
     // Sort descending by score
     localScores.sort((a, b) => b.score - a.score);
     // Keep top 10 locally

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fast Finger - Moderator & Live Screen</title>
+    <!-- Modern Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        window.env = window.env || {};
+    </script>
+    <script src="config.js"></script>
+</head>
+<body class="admin-body">
+
+    <div class="admin-container">
+        <!-- Top Header for Screen Projection -->
+        <header class="admin-header">
+            <div class="admin-brand">
+                <span class="live-pill">🔴 LIVE PROJECTOR</span>
+                <h1>⚡ FAST FINGER CHALLENGE</h1>
+                <p class="admin-subtitle">Live Event Leaderboard & Event Control Panel</p>
+            </div>
+            
+            <div class="admin-top-stats">
+                <div class="top-stat-card">
+                    <span class="stat-title">TOTAL PLAYERS</span>
+                    <span id="stat-total-players" class="stat-number">0</span>
+                </div>
+                <div class="top-stat-card highlight">
+                    <span class="stat-title">HIGHEST SCORE</span>
+                    <span id="stat-top-score" class="stat-number">0</span>
+                </div>
+                <div class="top-stat-card">
+                    <span class="stat-title">AVG CPS</span>
+                    <span id="stat-avg-cps" class="stat-number">0.0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area: Leaderboard Grid + Controls -->
+        <main class="admin-main">
+
+            <!-- Champion Spotlight Card -->
+            <section id="champion-card" class="champion-spotlight hidden">
+                <div class="crown-badge">👑 CURRENT #1 CHAMPION</div>
+                <h2 id="champ-name" class="champ-name">---</h2>
+                <div class="champ-score-box">
+                    <span id="champ-score" class="champ-score">0</span>
+                    <span class="champ-unit">CLICKS</span>
+                </div>
+                <div id="champ-cps" class="champ-cps">0 CPS</div>
+            </section>
+
+            <!-- Top Leaderboard List -->
+            <section class="admin-leaderboard-section">
+                <div class="section-title-bar">
+                    <h2>🏆 TOP 10 SPEEDSTERS</h2>
+                    <span id="last-updated-time" class="update-time">Updating live...</span>
+                </div>
+
+                <div class="admin-leaderboard-wrapper">
+                    <ul id="admin-leaderboard-list" class="admin-leaderboard-list">
+                        <li class="loading-state">Loading live scores from Supabase...</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Moderator Action Bar -->
+            <footer class="moderator-bar">
+                <div class="mod-status">
+                    <span id="status-indicator" class="status-dot online"></span>
+                    <span id="status-text">Connected to Supabase</span>
+                </div>
+
+                <div class="mod-actions">
+                    <button id="refresh-btn" class="btn-mod btn-refresh" onclick="fetchAdminData()">
+                        🔄 Refresh Now
+                    </button>
+                    <button id="reset-btn" class="btn-mod btn-danger" onclick="promptResetLeaderboard()">
+                        🗑️ Reset Leaderboard
+                    </button>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Reset Confirmation PIN Modal -->
+    <div id="pin-modal" class="modal-overlay hidden">
+        <div class="modal-card admin-modal">
+            <button class="close-modal-btn" onclick="closePinModal()">✕</button>
+            <div class="modal-header">
+                <div class="modal-trophy">🔐</div>
+                <h2>Moderator Reset</h2>
+                <p class="modal-subtitle">Enter PIN to wipe the leaderboard clean for a new session</p>
+            </div>
+            
+            <div class="input-group pin-group">
+                <input type="password" id="mod-pin-input" placeholder="Enter Moderator PIN..." maxlength="8" autocomplete="off" />
+                <button class="btn-danger-confirm" onclick="confirmResetLeaderboard()">CONFIRM RESET ⚠️</button>
+            </div>
+            <p id="pin-error" class="error-msg hidden">Incorrect PIN! Try again.</p>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

@@ -8,3 +8,6 @@ const SUPABASE_ANON_KEY = (typeof window !== 'undefined' && window.env && window
   ? window.env.SUPABASE_ANON_KEY 
   : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoenlnZ2d4eWxzbGplcnN5ZHZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMTE2NDEsImV4cCI6MjEwNDc4NzY0MX0.-ODoeUX0qUeUyeIKtGCDCKvZs-JBKzZr1jYiATelOio";
 
+// Moderator PIN code to clear/reset leaderboard
+const ADMIN_PIN = "1234";
+
