@@ -22,7 +22,10 @@
         <!-- Top Header for Screen Projection -->
         <header class="admin-header">
             <div class="admin-brand">
-                <span class="live-pill">🔴 LIVE PROJECTOR</span>
+                <div class="brand-pills">
+                    <span class="live-pill">🔴 LIVE PROJECTOR</span>
+                    <span id="game-status-pill" class="status-pill active">🟢 GAME OPEN</span>
+                </div>
                 <h1>⚡ FAST FINGER CHALLENGE</h1>
                 <p class="admin-subtitle">Live Event Leaderboard & Event Control Panel</p>
             </div>
@@ -37,8 +40,8 @@
                     <span id="stat-top-score" class="stat-number">0</span>
                 </div>
                 <div class="top-stat-card">
-                    <span class="stat-title">AVG CPS</span>
-                    <span id="stat-avg-cps" class="stat-number">0.0</span>
+                    <span class="stat-title">ROUND TIMER</span>
+                    <span id="admin-timer-display" class="stat-number timer-number">05:00</span>
                 </div>
             </div>
         </header>
@@ -79,11 +82,17 @@
                 </div>
 
                 <div class="mod-actions">
+                    <button id="timer-btn" class="btn-mod btn-timer" onclick="toggleSeminarTimer()">
+                        ⏱️ Start 5-Min Round
+                    </button>
+                    <button id="freeze-btn" class="btn-mod btn-warning" onclick="toggleGameFreeze()">
+                        🔒 Freeze Leaderboard
+                    </button>
                     <button id="refresh-btn" class="btn-mod btn-refresh" onclick="fetchAdminData()">
-                        🔄 Refresh Now
+                        🔄 Refresh
                     </button>
                     <button id="reset-btn" class="btn-mod btn-danger" onclick="promptResetLeaderboard()">
-                        🗑️ Reset Leaderboard
+                        🗑️ Reset
                     </button>
                 </div>
             </footer>

@@ -1,13 +1,14 @@
 // DOM Elements Variables
 let clickBox, boxText, timerDisplay, scoreDisplay, startBtn;
 let submitScoreSection, playerNameInput, submitScoreBtn, leaderboardList;
-let resultModal, modalScore, modalCps, modalRankBadge;
+let resultModal, modalScore, modalCps, modalRankBadge, frozenBanner;
 
 // Game State Variables
 let score = 0;
 let timeLeft = 30;
 let timerInterval = null;
 let gameActive = false;
+let isFrozen = false;
 
 // Function to initialize DOM elements and event listeners safely
 function init() {
@@ -30,6 +31,7 @@ function init() {
     playerNameInput = document.getElementById('player-name');
     submitScoreBtn = document.getElementById('submit-score-btn');
     leaderboardList = document.getElementById('leaderboard-list');
+    frozenBanner = document.getElementById('frozen-banner');
 
     resultModal = document.getElementById('result-modal');
     modalScore = document.getElementById('modal-score');
@@ -43,6 +45,10 @@ function init() {
     }
 
     fetchTopPlayers();
+    fetchFreezeStatus();
+
+    // Check freeze status every 4 seconds
+    setInterval(fetchFreezeStatus, 4000);
 }
 
 if (document.readyState === 'loading') {
@@ -51,8 +57,66 @@ if (document.readyState === 'loading') {
     init();
 }
 
+// Fetch Freeze Status from Supabase or LocalStorage
+async function fetchFreezeStatus() {
+    let currentFreeze = false;
+    if (supabase) {
+        try {
+            const { data, error } = await supabase
+                .from('game_settings')
+                .select('is_frozen')
+                .eq('id', 1)
+                .maybeSingle();
+
+            if (!error && data !== null) {
+                currentFreeze = !!data.is_frozen;
+            } else {
+                currentFreeze = localStorage.getItem('fastest_finger_game_frozen') === 'true';
+            }
+        } catch (e) {
+            currentFreeze = localStorage.getItem('fastest_finger_game_frozen') === 'true';
+        }
+    } else {
+        currentFreeze = localStorage.getItem('fastest_finger_game_frozen') === 'true';
+    }
+
+    isFrozen = currentFreeze;
+    updatePlayerFreezeUI();
+    return isFrozen;
+}
+
+// Update UI on player screen if frozen
+function updatePlayerFreezeUI() {
+    if (frozenBanner) {
+        if (isFrozen) {
+            frozenBanner.classList.remove('hidden');
+        } else {
+            frozenBanner.classList.add('hidden');
+        }
+    }
+
+    if (startBtn) {
+        if (isFrozen) {
+            startBtn.disabled = true;
+            startBtn.textContent = 'Leaderboard Locked 🔒';
+            startBtn.style.opacity = '0.6';
+        } else if (!gameActive) {
+            startBtn.disabled = false;
+            startBtn.textContent = 'Start Challenge 🚀';
+            startBtn.style.opacity = '1';
+        }
+    }
+}
+
 // Start / Reset Game
-function startGame() {
+async function startGame() {
+    // Re-verify freeze state before starting
+    const frozenNow = await fetchFreezeStatus();
+    if (frozenNow) {
+        alert('🔒 Competition Closed! The leaderboard is currently locked by the event organizers.');
+        return;
+    }
+
     closeModal();
 
     // Clear any existing active timer interval
@@ -245,6 +309,18 @@ async function submitScore() {
         return;
     }
 
+    // Re-verify freeze status before processing submission
+    const frozenNow = await fetchFreezeStatus();
+    if (frozenNow) {
+        alert('🔒 Competition Closed! Score submissions are currently locked by the event organizers.');
+        if (submitScoreBtn) {
+            submitScoreBtn.disabled = false;
+            submitScoreBtn.textContent = 'Save Score 🏆';
+        }
+        closeModal();
+        return;
+    }
+
     const deviceId = getDeviceId();
 
     // Save name to localStorage for fast repeat play
@@ -300,13 +376,17 @@ async function submitScore() {
                 if (numericScore > existingScore) {
                     // Try updating with device_id first
                     let updateSuccess = false;
+                    let lastError = null;
                     try {
                         const { error: err1 } = await supabase
                             .from('leaderboard')
                             .update({ player_name: name, score: numericScore, cps: cps, device_id: deviceId })
                             .eq('id', existing.id);
                         if (!err1) updateSuccess = true;
-                    } catch (e) {}
+                        else lastError = err1;
+                    } catch (e) {
+                        lastError = e;
+                    }
 
                     // Fallback update without device_id if column missing
                     if (!updateSuccess) {
@@ -325,7 +405,13 @@ async function submitScore() {
                         .from('leaderboard')
                         .insert([{ device_id: deviceId, player_name: name, score: numericScore, cps: cps }]);
                     if (!err1) insertSuccess = true;
-                } catch (e) {}
+                    else throw err1;
+                } catch (e) {
+                    // If error is RLS permission policy (game frozen), throw directly
+                    if (e && (e.code === '42501' || (e.message && e.message.includes('policy')))) {
+                        throw e;
+                    }
+                }
 
                 if (!insertSuccess) {
                     const { error: err2 } = await supabase
@@ -336,11 +422,17 @@ async function submitScore() {
             }
         } catch (err) {
             console.error('Error submitting score to Supabase:', err);
-            saveLocalScore({ device_id: deviceId, player_name: name, score: numericScore, cps: cps });
+            // Check if error is due to game freeze RLS rule
+            if (err && (err.code === '42501' || (err.message && err.message.toLowerCase().includes('policy')))) {
+                alert('🔒 Score submission rejected! The competition leaderboard is locked.');
+                closeModal();
+                return;
+            }
+            saveLocalScore({ device_id: deviceId, player_name: name, score: parseInt(score, 10), cps: cps });
         }
     } else {
         // Fallback: Save to LocalStorage
-        saveLocalScore({ device_id: deviceId, player_name: name, score: score, cps: cps });
+        saveLocalScore({ device_id: deviceId, player_name: name, score: parseInt(score, 10), cps: cps });
     }
 
     closeModal();

@@ -1,6 +1,11 @@
 // Admin Dashboard & Live Screen Projection Script
 let supabaseAdmin = null;
 let pollInterval = null;
+let isFrozen = false;
+
+// 5-minute Seminar Timer State
+let seminarTimerInterval = null;
+let seminarTimeRemaining = 300; // 5 minutes (300s)
 
 // Initialize Supabase Client
 function initAdmin() {
@@ -13,16 +18,149 @@ function initAdmin() {
     }
 
     fetchAdminData();
+    fetchFreezeStatus();
 
     // Auto refresh live screen every 3 seconds
     if (pollInterval) clearInterval(pollInterval);
-    pollInterval = setInterval(fetchAdminData, 3000);
+    pollInterval = setInterval(() => {
+        fetchAdminData();
+        fetchFreezeStatus();
+    }, 3000);
 }
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initAdmin);
 } else {
     initAdmin();
+}
+
+// Fetch Freeze Status from Supabase or LocalStorage
+async function fetchFreezeStatus() {
+    if (supabaseAdmin) {
+        try {
+            const { data, error } = await supabaseAdmin
+                .from('game_settings')
+                .select('is_frozen')
+                .eq('id', 1)
+                .maybeSingle();
+
+            if (!error && data !== null) {
+                isFrozen = !!data.is_frozen;
+            } else {
+                isFrozen = localStorage.getItem('fastest_finger_game_frozen') === 'true';
+            }
+        } catch (e) {
+            isFrozen = localStorage.getItem('fastest_finger_game_frozen') === 'true';
+        }
+    } else {
+        isFrozen = localStorage.getItem('fastest_finger_game_frozen') === 'true';
+    }
+
+    updateFreezeUI();
+}
+
+// Update Freeze UI elements on Admin Dashboard
+function updateFreezeUI() {
+    const statusPill = document.getElementById('game-status-pill');
+    const freezeBtn = document.getElementById('freeze-btn');
+
+    if (statusPill) {
+        if (isFrozen) {
+            statusPill.textContent = '🔒 GAME FROZEN';
+            statusPill.className = 'status-pill frozen';
+        } else {
+            statusPill.textContent = '🟢 GAME OPEN';
+            statusPill.className = 'status-pill active';
+        }
+    }
+
+    if (freezeBtn) {
+        if (isFrozen) {
+            freezeBtn.innerHTML = '🔓 Unlock Game';
+            freezeBtn.className = 'btn-mod btn-success';
+        } else {
+            freezeBtn.innerHTML = '🔒 Freeze Leaderboard';
+            freezeBtn.className = 'btn-mod btn-warning';
+        }
+    }
+}
+
+// Toggle Game Freeze State in Supabase & LocalStorage
+async function toggleGameFreeze(forceState = null) {
+    const newState = (forceState !== null) ? forceState : !isFrozen;
+    isFrozen = newState;
+
+    // Save to LocalStorage fallback
+    localStorage.setItem('fastest_finger_game_frozen', newState ? 'true' : 'false');
+
+    if (supabaseAdmin) {
+        try {
+            // Attempt update or insert into game_settings table (id=1)
+            const { error: updateErr } = await supabaseAdmin
+                .from('game_settings')
+                .upsert({ id: 1, is_frozen: newState, updated_at: new Date().toISOString() });
+
+            if (updateErr) {
+                console.warn('game_settings upsert error:', updateErr);
+            }
+        } catch (err) {
+            console.error('Error updating freeze state in Supabase:', err);
+        }
+    }
+
+    updateFreezeUI();
+
+    if (newState) {
+        alert('🔒 Game Leaderboard has been FROZEN! No new scores can be submitted.');
+    } else {
+        alert('🔓 Game Leaderboard has been UNLOCKED! Players can submit scores.');
+    }
+}
+
+// 5-Minute Seminar Competition Timer Control
+function toggleSeminarTimer() {
+    const timerBtn = document.getElementById('timer-btn');
+    const timerDisplay = document.getElementById('admin-timer-display');
+
+    if (seminarTimerInterval) {
+        // Pause timer
+        clearInterval(seminarTimerInterval);
+        seminarTimerInterval = null;
+        if (timerBtn) timerBtn.innerHTML = '⏱️ Resume Timer';
+        return;
+    }
+
+    // Reset timer to 5 mins if ended
+    if (seminarTimeRemaining <= 0) {
+        seminarTimeRemaining = 300;
+    }
+
+    if (timerBtn) timerBtn.innerHTML = '⏸️ Pause 5-Min Timer';
+
+    // If game was frozen, auto-unfreeze when round starts
+    if (isFrozen) {
+        toggleGameFreeze(false);
+    }
+
+    seminarTimerInterval = setInterval(() => {
+        seminarTimeRemaining--;
+
+        const mins = Math.floor(seminarTimeRemaining / 60);
+        const secs = seminarTimeRemaining % 60;
+        const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+        if (timerDisplay) timerDisplay.textContent = formatted;
+
+        if (seminarTimeRemaining <= 0) {
+            clearInterval(seminarTimerInterval);
+            seminarTimerInterval = null;
+            if (timerDisplay) timerDisplay.textContent = '00:00';
+            if (timerBtn) timerBtn.innerHTML = '⏱️ Start 5-Min Round';
+
+            // AUTO FREEZE LEADERBOARD WHEN 5 MINUTES EXPIRE!
+            toggleGameFreeze(true);
+        }
+    }, 1000);
 }
 
 // Fetch Top Scores & Overview Stats
