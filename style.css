@@ -1215,3 +1215,108 @@ body {
     color: #64748b;
     margin-top: 4px;
 }
+
+/* ==========================================================================
+   LARGE DISPLAY & VENUE PROJECTOR OPTIMIZATION (1080p, 4K, 16:9 Stage Displays)
+   ========================================================================== */
+@media (min-width: 1200px) {
+    .admin-container {
+        max-width: 1320px;
+        gap: 28px;
+    }
+
+    .admin-brand h1 {
+        font-size: 2.6rem;
+    }
+
+    .admin-subtitle {
+        font-size: 1.05rem;
+    }
+
+    .top-stat-card {
+        padding: 16px 28px;
+        min-width: 150px;
+    }
+
+    .top-stat-card .stat-title {
+        font-size: 0.82rem;
+    }
+
+    .top-stat-card .stat-number {
+        font-size: 2.2rem;
+    }
+
+    .champion-spotlight {
+        padding: 36px;
+        border-radius: 28px;
+    }
+
+    .crown-badge {
+        font-size: 1rem;
+        padding: 8px 22px;
+    }
+
+    .champ-name {
+        font-size: 3rem;
+    }
+
+    .champ-score {
+        font-size: 5rem;
+    }
+
+    .champ-cps {
+        font-size: 1.1rem;
+        padding: 6px 18px;
+    }
+
+    .section-title-bar h2 {
+        font-size: 1.6rem;
+    }
+
+    .admin-item {
+        padding: 18px 28px;
+        grid-template-columns: 100px 1fr 140px 160px;
+    }
+
+    .badge-rank {
+        font-size: 1.25rem;
+    }
+
+    .player-name-text {
+        font-size: 1.35rem;
+    }
+
+    .cps-text {
+        font-size: 1.1rem;
+    }
+
+    .score-pill {
+        font-size: 1.5rem;
+    }
+}
+
+@media (min-width: 1600px) {
+    .admin-container {
+        max-width: 1560px;
+    }
+
+    .admin-brand h1 {
+        font-size: 3.2rem;
+    }
+
+    .champ-name {
+        font-size: 3.6rem;
+    }
+
+    .champ-score {
+        font-size: 6rem;
+    }
+
+    .player-name-text {
+        font-size: 1.5rem;
+    }
+
+    .score-pill {
+        font-size: 1.8rem;
+    }
+}

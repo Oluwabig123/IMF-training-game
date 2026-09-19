@@ -253,9 +253,9 @@ function endGame() {
     
     // Determine Speed Grade
     let rank = '';
-    if (score >= 200) rank = '🔥 GOD SPEED! Lightning fingers!';
-    else if (score >= 150) rank = '⚡ FAST FINGERS! Impressive speed!';
-    else if (score >= 100) rank = '👍 GOOD SPEED! Above average!';
+    if (score >= 1200) rank = '🔥 GOD SPEED! Lightning fingers!';
+    else if (score >= 1000) rank = '⚡ FAST FINGERS! Impressive speed!';
+    else if (score >= 300) rank = '👍 GOOD SPEED! Above average!';
     else rank = '🐢 CASUAL CLICKER! Practice makes perfect.';
 
     // Populate Modal Summary
