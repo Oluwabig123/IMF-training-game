@@ -70,6 +70,7 @@ async function fetchFreezeStatus() {
 
             if (!error && data !== null) {
                 currentFreeze = !!data.is_frozen;
+                localStorage.setItem('fastest_finger_game_frozen', currentFreeze ? 'true' : 'false');
             } else {
                 currentFreeze = localStorage.getItem('fastest_finger_game_frozen') === 'true';
             }

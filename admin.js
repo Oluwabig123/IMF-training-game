@@ -2,6 +2,7 @@
 let supabaseAdmin = null;
 let pollInterval = null;
 let isFrozen = false;
+let freezeWriteFailed = false;
 
 // 5-minute Seminar Timer State
 let seminarTimerInterval = null;
@@ -44,8 +45,9 @@ async function fetchFreezeStatus() {
                 .eq('id', 1)
                 .maybeSingle();
 
-            if (!error && data !== null) {
+            if (!error && data !== null && !freezeWriteFailed) {
                 isFrozen = !!data.is_frozen;
+                localStorage.setItem('fastest_finger_game_frozen', isFrozen ? 'true' : 'false');
             } else {
                 isFrozen = localStorage.getItem('fastest_finger_game_frozen') === 'true';
             }
@@ -90,8 +92,9 @@ async function toggleGameFreeze(forceState = null) {
     const newState = (forceState !== null) ? forceState : !isFrozen;
     isFrozen = newState;
 
-    // Save to LocalStorage fallback
+    // Save to LocalStorage immediately
     localStorage.setItem('fastest_finger_game_frozen', newState ? 'true' : 'false');
+    updateFreezeUI();
 
     if (supabaseAdmin) {
         try {
@@ -101,19 +104,25 @@ async function toggleGameFreeze(forceState = null) {
                 .upsert({ id: 1, is_frozen: newState, updated_at: new Date().toISOString() });
 
             if (updateErr) {
-                console.warn('game_settings upsert error:', updateErr);
+                console.warn('game_settings upsert error, trying update fallback:', updateErr);
+                const { error: updateOnlyErr } = await supabaseAdmin
+                    .from('game_settings')
+                    .update({ is_frozen: newState, updated_at: new Date().toISOString() })
+                    .eq('id', 1);
+
+                if (updateOnlyErr) {
+                    console.warn('game_settings update error:', updateOnlyErr);
+                    freezeWriteFailed = true;
+                } else {
+                    freezeWriteFailed = false;
+                }
+            } else {
+                freezeWriteFailed = false;
             }
         } catch (err) {
             console.error('Error updating freeze state in Supabase:', err);
+            freezeWriteFailed = true;
         }
-    }
-
-    updateFreezeUI();
-
-    if (newState) {
-        alert('🔒 Game Leaderboard has been FROZEN! No new scores can be submitted.');
-    } else {
-        alert('🔓 Game Leaderboard has been UNLOCKED! Players can submit scores.');
     }
 }
 
