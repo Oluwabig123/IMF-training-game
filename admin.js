@@ -182,15 +182,18 @@ async function fetchAdminData() {
 
     if (supabaseAdmin) {
         try {
-            // Fetch Top High Scores
-            const { data, error } = await supabaseAdmin
+            // Fetch Top 3 High Scores & Total Player Count
+            const { data, count, error } = await supabaseAdmin
                 .from('leaderboard')
-                .select('player_name, score, cps, created_at')
+                .select('player_name, score, cps, created_at', { count: 'exact' })
                 .order('score', { ascending: false })
-                .limit(10);
+                .limit(3);
 
             if (error) throw error;
             playersData = data || [];
+            if (typeof count === 'number') {
+                playersData.totalCount = count;
+            }
 
             if (statusDot) statusDot.className = 'status-dot online';
             if (statusText) statusText.textContent = 'Connected to Supabase (Live)';
@@ -214,7 +217,7 @@ async function fetchAdminData() {
     }
 }
 
-// Render Champion Highlight + Top 10 List + Stats Header
+// Render Champion Highlight + Top 3 List + Stats Header
 function renderAdminDashboard(players) {
     const totalPlayersEl = document.getElementById('stat-total-players');
     const topScoreEl = document.getElementById('stat-top-score');
@@ -228,7 +231,7 @@ function renderAdminDashboard(players) {
     const adminList = document.getElementById('admin-leaderboard-list');
 
     // Total stats
-    const totalPlayers = players.length;
+    const totalPlayers = typeof players.totalCount === 'number' ? players.totalCount : players.length;
     const topScore = players.length > 0 ? players[0].score : 0;
     const sumCps = players.reduce((acc, p) => acc + (parseFloat(p.cps) || 0), 0);
     const avgCps = players.length > 0 ? (sumCps / players.length).toFixed(1) : '0.0';
@@ -247,7 +250,7 @@ function renderAdminDashboard(players) {
         champCard.classList.add('hidden');
     }
 
-    // Render Leaderboard Items
+    // Render Leaderboard Items (Top 3 Only)
     if (!adminList) return;
 
     if (players.length === 0) {
@@ -257,9 +260,10 @@ function renderAdminDashboard(players) {
 
     const rankBadges = ['🥇 1st', '🥈 2nd', '🥉 3rd'];
 
-    adminList.innerHTML = players.map((item, index) => {
+    // Display only top 3
+    adminList.innerHTML = players.slice(0, 3).map((item, index) => {
         const rankLabel = rankBadges[index] || `#${index + 1}`;
-        const isTop3 = index < 3 ? `top-rank rank-${index + 1}` : '';
+        const isTop3 = `top-rank rank-${index + 1}`;
 
         return `
             <li class="admin-item ${isTop3}">
@@ -285,7 +289,7 @@ function getLocalScores() {
     const LOCAL_STORAGE_KEY = 'fastest_finger_top_scores';
     try {
         const local = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
-        return local.slice(0, 10);
+        return local.slice(0, 3);
     } catch (e) {
         return [];
     }

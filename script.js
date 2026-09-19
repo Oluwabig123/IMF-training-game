@@ -46,9 +46,6 @@ function init() {
 
     fetchTopPlayers();
     fetchFreezeStatus();
-
-    // Check freeze status every 4 seconds
-    setInterval(fetchFreezeStatus, 4000);
 }
 
 if (document.readyState === 'loading') {
@@ -337,36 +334,39 @@ async function submitScore() {
         try {
             const numericScore = parseInt(score, 10);
 
-            // Attempt query with device_id, fallback to player_name if device_id column missing
+            // Single optimized lookup query (device_id OR player_name)
             let existing = null;
 
             try {
-                if (deviceId) {
-                    const { data: existingDevice } = await supabase
-                        .from('leaderboard')
-                        .select('id, score, player_name')
-                        .eq('device_id', deviceId)
-                        .order('id', { ascending: false })
-                        .limit(1);
+                const searchFilter = deviceId 
+                    ? `device_id.eq.${deviceId},player_name.ilike.${name}` 
+                    : `player_name.ilike.${name}`;
 
-                    if (existingDevice && existingDevice.length > 0) {
-                        existing = existingDevice[0];
-                    }
-                }
-            } catch (e) {
-                console.warn('device_id check skipped:', e);
-            }
-
-            if (!existing) {
-                const { data: existingName, error: nameErr } = await supabase
+                const { data: records, error: searchErr } = await supabase
                     .from('leaderboard')
                     .select('id, score, player_name')
-                    .ilike('player_name', name)
+                    .or(searchFilter)
                     .order('id', { ascending: false })
                     .limit(1);
 
-                if (!nameErr && existingName && existingName.length > 0) {
-                    existing = existingName[0];
+                if (!searchErr && records && records.length > 0) {
+                    existing = records[0];
+                }
+            } catch (e) {
+                // Fallback to simple player_name search if device_id column or .or() fails
+                try {
+                    const { data: existingName } = await supabase
+                        .from('leaderboard')
+                        .select('id, score, player_name')
+                        .ilike('player_name', name)
+                        .order('id', { ascending: false })
+                        .limit(1);
+
+                    if (existingName && existingName.length > 0) {
+                        existing = existingName[0];
+                    }
+                } catch (fallbackErr) {
+                    console.warn('Fallback search skipped:', fallbackErr);
                 }
             }
 
@@ -504,7 +504,7 @@ function getLocalTopPlayers() {
 // Render Leaderboard HTML with Conference Rank Styling
 function renderLeaderboard(players, isOffline) {
     if (!players || players.length === 0) {
-        leaderboardList.innerHTML = `<li class="empty">No scores recorded yet. Be the first player! ${isOffline ? '(Offline Mode)' : ''}</li>`;
+        leaderboardList.innerHTML = `<li class="empty">Wellcome to IMF. No scores recorded yet. Be the first player! ${isOffline ? '(Offline Mode)' : ''}</li>`;
         return;
     }
 
